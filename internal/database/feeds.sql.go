@@ -7,21 +7,23 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
 const createFeed = `-- name: CreateFeed :exec
-INSERT INTO feeds (id, name, url, created_at, updated_at, user_id)
-VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO feeds (id, name, url, last_fetched_at, created_at, updated_at, user_id)
+VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateFeedParams struct {
-	ID        string
-	Name      string
-	Url       string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	UserID    string
+	ID            string
+	Name          string
+	Url           string
+	LastFetchedAt sql.NullTime
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	UserID        string
 }
 
 func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) error {
@@ -29,6 +31,7 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) error {
 		arg.ID,
 		arg.Name,
 		arg.Url,
+		arg.LastFetchedAt,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.UserID,
@@ -37,7 +40,7 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) error {
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT id, name, url, created_at, updated_at, user_id FROM feeds
+SELECT id, name, url, created_at, updated_at, user_id, last_fetched_at FROM feeds
 `
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
@@ -56,6 +59,7 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.UserID,
+			&i.LastFetchedAt,
 		); err != nil {
 			return nil, err
 		}

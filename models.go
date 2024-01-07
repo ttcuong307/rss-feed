@@ -2,6 +2,7 @@ package main
 
 import (
 	"rss-feed/internal/database"
+	tools "rss-feed/pkg/tools"
 	"time"
 )
 
@@ -34,22 +35,24 @@ func databaseUserToUser(user database.User) User {
 }
 
 type Feed struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Url       string    `json:"url"`
-	UserID    string    `json:"user_id"`
+	ID            string     `json:"id"`
+	Name          string     `json:"name"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	Url           string     `json:"url"`
+	UserID        string     `json:"user_id"`
+	LastFetchedAt *time.Time `json:"last_fetched_at"`
 }
 
 func convFeedToFeed(feed database.CreateFeedParams) Feed {
 	return Feed{
-		ID:        feed.ID,
-		Name:      feed.Name,
-		UserID:    feed.UserID,
-		Url:       feed.Url,
-		CreatedAt: feed.CreatedAt,
-		UpdatedAt: feed.UpdatedAt,
+		ID:            feed.ID,
+		Name:          feed.Name,
+		UserID:        feed.UserID,
+		Url:           feed.Url,
+		LastFetchedAt: tools.SqlNullTimeToTime(feed.LastFetchedAt),
+		CreatedAt:     feed.CreatedAt,
+		UpdatedAt:     feed.UpdatedAt,
 	}
 }
 
