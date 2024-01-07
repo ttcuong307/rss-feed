@@ -53,6 +53,11 @@ func main() {
 
 	apiRouterV1.Post("/feeds", apiConfig.middleWareAuth(apiConfig.handlerCreateFeed))
 	apiRouterV1.Get("/feeds", apiConfig.handlerGetFeeds)
+
+	apiRouterV1.Get("/feed_follows", apiConfig.middleWareAuth(apiConfig.handlerGetFeedFollows))
+	apiRouterV1.Post("/feed_follows", apiConfig.middleWareAuth(apiConfig.handlerCreateFeedFollow))
+	apiRouterV1.Delete("/feed_follows/{feedFollowID}", apiConfig.middleWareAuth(apiConfig.handlerDeleteFeedFollow))
+
 	router.Mount("/v1", apiRouterV1)
 
 	server := &http.Server{

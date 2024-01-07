@@ -52,3 +52,36 @@ func convFeedToFeed(feed database.CreateFeedParams) Feed {
 		UpdatedAt: feed.UpdatedAt,
 	}
 }
+
+type FeedFollow struct {
+	ID        string    `json:"id"`
+	FeedID    string    `json:"feed_id"`
+	UserID    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func convFeedFollowToFeedFollow(feedFollow database.CreateFeedFollowParams) FeedFollow {
+	return FeedFollow{
+		ID:        feedFollow.ID,
+		FeedID:    feedFollow.FeedID,
+		UserID:    feedFollow.UserID,
+		CreatedAt: feedFollow.CreatedAt,
+		UpdatedAt: feedFollow.UpdatedAt,
+	}
+}
+
+func databaseFeedFollowsToFeedFollows(feedFollows []database.FeedFollow) []FeedFollow {
+	var output []FeedFollow
+	for _, feedFollow := range feedFollows {
+		output = append(output, FeedFollow{
+			ID:        feedFollow.ID,
+			FeedID:    feedFollow.FeedID,
+			UserID:    feedFollow.UserID,
+			CreatedAt: feedFollow.CreatedAt,
+			UpdatedAt: feedFollow.UpdatedAt,
+		})
+	}
+
+	return output
+}
