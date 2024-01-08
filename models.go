@@ -1,9 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"rss-feed/internal/database"
-	tools "rss-feed/pkg/tools"
 	"time"
+
+	"gopkg.in/guregu/null.v3"
 )
 
 type User struct {
@@ -50,7 +52,7 @@ func convFeedToFeed(feed database.CreateFeedParams) Feed {
 		Name:          feed.Name,
 		UserID:        feed.UserID,
 		Url:           feed.Url,
-		LastFetchedAt: tools.SqlNullTimeToTime(feed.LastFetchedAt),
+		LastFetchedAt: SqlNullTimeToTime(feed.LastFetchedAt),
 		CreatedAt:     feed.CreatedAt,
 		UpdatedAt:     feed.UpdatedAt,
 	}
@@ -87,4 +89,18 @@ func databaseFeedFollowsToFeedFollows(feedFollows []database.FeedFollow) []FeedF
 	}
 
 	return output
+}
+
+func NullTimeToTime(nt null.Time) *time.Time {
+	if nt.Valid {
+		return &nt.Time
+	}
+	return nil
+}
+
+func SqlNullTimeToTime(nt sql.NullTime) *time.Time {
+	if nt.Valid {
+		return &nt.Time
+	}
+	return nil
 }
