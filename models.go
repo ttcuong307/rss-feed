@@ -104,3 +104,39 @@ func SqlNullTimeToTime(nt sql.NullTime) *time.Time {
 	}
 	return nil
 }
+
+type Post struct {
+	ID          string     `json:"id"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	Title       string     `json:"title"`
+	Url         string     `json:"url"`
+	Description *string    `json:"description"`
+	PublishedAt *time.Time `json:"published_at"`
+	FeedID      string     `json:"feed_id"`
+}
+
+func databasePostsToPosts(posts []database.Post) []Post {
+	var output []Post
+	for _, post := range posts {
+		output = append(output, Post{
+			ID:          post.ID,
+			CreatedAt:   post.CreatedAt,
+			UpdatedAt:   post.UpdatedAt,
+			Title:       post.Title,
+			Url:         post.Url,
+			Description: SqlNullStringToString(post.Description),
+			PublishedAt: SqlNullTimeToTime(post.PublishedAt),
+			FeedID:      post.FeedID,
+		})
+	}
+
+	return output
+}
+
+func SqlNullStringToString(ns sql.NullString) *string {
+	if ns.Valid {
+		return &ns.String
+	}
+	return nil
+}

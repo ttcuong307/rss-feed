@@ -8,8 +8,11 @@ import (
 	"log"
 	"net/http"
 	"rss-feed/internal/database"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func startScraping(db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
@@ -48,7 +51,29 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 	}
 	feedData, err := fetchFeed(feed.Url)
 	for _, item := range feedData.Channel.Item {
-		log.Println("Found post", item.Title)
+		publishedAt := sql.NullTime{}
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+			publishedAt = sql.NullTime{Time: t, Valid: true}
+		}
+
+		err = db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New().String(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			FeedID:      feed.ID,
+			Title:       item.Title,
+			Description: sql.NullString{String: item.Description, Valid: true},
+			Url:         item.Link,
+			PublishedAt: publishedAt,
+		})
+
+		if err != nil {
+			if strings.Contains(err.Error(), "Duplicate key value violates unique constraint") {
+				continue
+			}
+			log.Println("Couldn't create post", err)
+			continue
+		}
 	}
 	log.Printf("Feed %s collected, %v posts found", feed.Name, len(feedData.Channel.Item))
 }
